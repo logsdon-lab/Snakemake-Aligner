@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - samtools
+  - minimap2==2.28
+  - seqkit

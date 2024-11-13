@@ -1,0 +1,105 @@
+include: "rules/common.smk"
+
+
+SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
+SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
+
+TMP_DIR = config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp"))
+LOGS_DIR = config.get("logs_dir", "logs/align")
+BMKS_DIR = config.get("benchmarks_dir", "benchmarks/align")
+ALIGNERS = {"winnowmap", "pbmm2", "minimap2"}
+ALIGNER = config.get("aligner", "winnowmap")
+
+
+def get_asm(wc):
+    return (
+        os.path.join(config["output_dir"], f"{wc.sm}_merged_dedup_asm.fa")
+        if isinstance(SAMPLE_ASSEMBLIES[str(wc.sm)], dict)
+        else SAMPLE_ASSEMBLIES[str(wc.sm)]
+    )
+
+
+if ALIGNER not in ALIGNERS:
+    raise ValueError(f"Invalid aligner option. ({ALIGNER})")
+
+
+include: "rules/winnowmap.smk" if ALIGNER == "winnowmap" else "rules/minimap2.smk"
+
+
+wildcard_constraints:
+    sm="|".join(SAMPLE_ASSEMBLIES.keys()),
+
+
+rule merge_asm_files:
+    input:
+        asm_files=lambda wc: ancient(SAMPLE_ASSEMBLIES[str(wc.sm)].values()),
+    output:
+        merged_asm=temp(os.path.join(config["output_dir"], "{sm}_merged_asm.fa")),
+        asm=os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa"),
+    conda:
+        f"env/{ALIGNER}.yaml"
+    resources:
+        mem=8,
+    log:
+        os.path.join(LOGS_DIR, "merge_{sm}_asm_files.log"),
+    shell:
+        """
+        for file in {input.asm_files}; do
+            if [[ $file == *.gz ]]; then
+                zcat $file >> {output.merged_asm}
+            else
+                cat $file >> {output.merged_asm}
+            fi
+        done
+        seqkit rmdup {output.merged_asm} > {output.asm} 2> {log}
+        """
+
+
+def get_aln_to_asm(wc) -> list[str]:
+    sm_reads = SAMPLE_READS[str(wc.sm)]
+    samples = [str(wc.sm)] * len(sm_reads)
+
+    alns = set(
+        expand(rules.align_reads_to_asm.output, zip, sm=samples, id=sm_reads.keys())
+    )
+    if not alns:
+        raise FileNotFoundError(f"No reads found for sample: {SAMPLE_INFO[str(wc.sm)]}")
+    return ancient(alns)
+
+
+rule merge_read_asm_alignments:
+    input:
+        get_aln_to_asm,
+    output:
+        alignment=os.path.join(config["output_dir"], "{sm}.bam"),
+        alignment_idx=os.path.join(config["output_dir"], "{sm}.bam.bai"),
+    threads: config["threads_aln"]
+    resources:
+        mem=config["mem_aln"],
+        sort_mem="4G",
+    params:
+        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
+    conda:
+        f"env/{ALIGNER}.yaml"
+    log:
+        os.path.join(LOGS_DIR, "merge_{sm}_read_asm_alignments.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "merge_{sm}_read_asm_alignments.tsv")
+    shell:
+        """
+        num_files=$(wc -w <<< "{input}")
+
+        if [ $num_files -gt 1 ]; then
+            {{ samtools merge -@ {threads} - {input} | \
+            samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
+        else
+            ln -s {input} {output.alignment}
+        fi
+        samtools index {output.alignment} 2>> {log}
+        """
+
+
+rule align:
+    input:
+        expand(rules.merge_read_asm_alignments.output, sm=SAMPLE_ASSEMBLIES.keys()),
+    default_target: True

@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - samtools
+  - pbmm2==1.14.99
+  - seqkit

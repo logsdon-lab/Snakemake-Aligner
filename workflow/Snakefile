@@ -93,7 +93,7 @@ rule merge_read_asm_alignments:
             {{ samtools merge -@ {threads} - {input} | \
             samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
         else
-            ln -s {input} {output.alignment}
+            cp {input} {output.alignment}
         fi
         samtools index {output.alignment} 2>> {log}
         """

@@ -1,11 +1,11 @@
 # Snakemake-Aligner
 [![CI](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml)
 
-A workflow to map PacBio HiFi reads back to an assembly.
+A workflow to map long reads back to an assembly.
 
 This workflow will:
 1. Align reads via [`minimap2`](https://github.com/lh3/minimap2), [`pbmm2`](https://github.com/PacificBiosciences/pbmm2), or [`winnowmap`](https://github.com/marbl/Winnowmap).
-2. Filter unmapped reads and non-primary alignments.
+2. Optionally, filter unmapped reads and non-primary alignments.
 
 ### Getting Started
 ```bash

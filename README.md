@@ -1,5 +1,5 @@
 # Snakemake-Aligner
-[![CI](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/Snakemake-NucFlag/actions/workflows/main.yml)
+[![CI](https://github.com/logsdon-lab/Snakemake-Aligner/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/Snakemake-Aligner/actions/workflows/main.yml)
 
 A workflow to map long reads back to an assembly.
 

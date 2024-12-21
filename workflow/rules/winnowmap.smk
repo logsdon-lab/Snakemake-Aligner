@@ -37,16 +37,17 @@ rule align_reads_to_asm:
     params:
         aligner_opts=config.get("aligner_opts", "-a --eqx --cs -x map-pb"),
         reads=lambda wc, input: (
-            f"<(samtools bam2fq {input.reads})"
+            f"<(samtools bam2fq -T '*' {input.reads})"
             if str(input.reads).endswith(".bam")
             else input.reads
         ),
-        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"
             if config.get("samtools_view_flag")
             else ""
         ),
+    shadow:
+        "minimal"
     conda:
         ENV_YAML
     log:
@@ -59,5 +60,5 @@ rule align_reads_to_asm:
         {params.aligner_opts} \
         -t {threads} -I8g \
         {input.asm} {params.reads} | {params.samtools_view} \
-        samtools sort -T {params.tmp_dir} -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
+        samtools sort -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
         """

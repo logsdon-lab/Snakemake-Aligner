@@ -77,24 +77,18 @@ rule merge_read_asm_alignments:
     resources:
         mem=config["mem_aln"],
         sort_mem="4G",
-    params:
-        tmp_dir=config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp")),
     conda:
         f"env/{ALIGNER}.yaml"
+    shadow:
+        "minimal"
     log:
         os.path.join(LOGS_DIR, "merge_{sm}_read_asm_alignments.log"),
     benchmark:
         os.path.join(BMKS_DIR, "merge_{sm}_read_asm_alignments.tsv")
     shell:
         """
-        num_files=$(wc -w <<< "{input}")
-
-        if [ $num_files -gt 1 ]; then
-            {{ samtools merge -@ {threads} - {input} | \
-            samtools sort -T {params.tmp_dir} -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
-        else
-            cp {input} {output.alignment}
-        fi
+        {{ samtools merge -@ {threads} - {input} | \
+        samtools sort -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
         samtools index {output.alignment} 2>> {log}
         """
 

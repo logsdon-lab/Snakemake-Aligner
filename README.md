@@ -33,12 +33,12 @@ samples:
     asm_fofn: "1.fofn"
 ```
 
-By directory and file extension.
+By directory and file regex.
 ```yaml
 samples:
 -   name: "1"
     asm_dir: "1/"
-    asm_ext: "fa.gz"
+    asm_rgx: ".*\\.fa.gz$"
 ```
 
 ##### Reads
@@ -54,7 +54,7 @@ By directory and file extension.
 samples:
 -   name: "1"
     read_dir: "1/"
-    read_ext: "bam"
+    read_rgx: ".*\\.bam$"
 ```
 
 #### Configuration
@@ -68,9 +68,7 @@ aligner: "winnowmap"
 # To override default aligner params.
 aligner_opts: "--MD -ax map-pb"
 # Output directory
-output_dir: "results/nucflag"
-# Temporary directory of intermediates
-tmp_dir: "temp"
+output_dir: "results/align"
 # Log directory
 logs_dir: "logs/align"
 # Benchmarks directory
@@ -121,7 +119,7 @@ module Align:
         )
     config: CFG
 
-use rule * from CFG as *
+use rule * from Align as align_*
 
 rule all:
     input:

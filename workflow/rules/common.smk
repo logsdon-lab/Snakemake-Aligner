@@ -13,19 +13,16 @@ def read_fofn_file(path: str) -> Iterator[tuple[str, str]]:
 
 
 def get_dir_files(
-    dirname: str, ext: str, depth: int | None = None
+    dirname: str, rgx: str, depth: int | None = None
 ) -> Iterator[tuple[str, str]]:
-    escaped_ext = re.escape(f".{ext}")
-    path_pattern = re.compile(r"([^/]+)(" + escaped_ext + ")$")
+    path_pattern = re.compile(rgx)
     for i, (root, read_dirs, fnames) in enumerate(os.walk(dirname), 1):
         for file in fnames:
             read_dir_path = os.path.join(root, file)
-            try:
-                flowcell_id, _ = re.search(path_pattern, file).groups()
-            except (ValueError, AttributeError):
+            if not re.search(path_pattern, file):
                 continue
-
-            yield read_dir_path, flowcell_id
+            read_id = os.path.splitext(file)[0]
+            yield read_dir_path, read_id
 
         if i == depth:
             break
@@ -45,21 +42,21 @@ def get_sample_assemblies_and_reads() -> (
         if asm_fofn:
             for file, fid in read_fofn_file(asm_fofn):
                 SAMPLE_ASSEMBLIES[sm_name][fid] = file
-        elif sm.get("asm_dir") and sm.get("asm_ext"):
-            for file, fid in get_dir_files(sm["asm_dir"], sm["asm_ext"]):
+        elif sm.get("asm_dir") and sm.get("asm_rgx"):
+            for file, fid in get_dir_files(sm["asm_dir"], sm["asm_rgx"]):
                 SAMPLE_ASSEMBLIES[sm_name][fid] = file
         elif sm.get("asm_fa"):
             SAMPLE_ASSEMBLIES[sm_name] = sm["asm_fa"]
         else:
-            raise ValueError("Must provide either asm_fofn or asm_dir and asm_ext.")
+            raise ValueError("Must provide either asm_fofn or asm_dir and asm_rgx.")
 
         if read_fofn:
             for file, fid in read_fofn_file(read_fofn):
                 SAMPLE_READS[sm_name][fid] = file
-        elif sm.get("read_dir") and sm.get("read_ext"):
-            for file, fid in get_dir_files(sm["read_dir"], sm["read_ext"]):
+        elif sm.get("read_dir") and sm.get("read_rgx"):
+            for file, fid in get_dir_files(sm["read_dir"], sm["read_rgx"]):
                 SAMPLE_READS[sm_name][fid] = file
         else:
-            raise ValueError("Must provide either read_fofn or read_dir and read_ext.")
+            raise ValueError("Must provide either read_fofn or read_dir and read_rgx.")
 
     return SAMPLE_ASSEMBLIES, SAMPLE_READS

@@ -1,0 +1,21 @@
+
+samples:
+  - name: sample1
+    asm_fofn: test/sample1/asm.fofn
+    read_fofn: test/sample1/reads.fofn
+  - name: sample2
+    asm_dir: test/sample2/asm
+    asm_rgx: ".*\\.fa$"
+    read_dir: test/sample2/reads
+    read_rgx: ".*\\.bam$"
+  - name: sample3
+    asm_fa: test/sample3/test.fa
+    read_dir: test/sample3/reads
+    read_rgx: ".*\\.bam$"
+
+output_dir: "results/align"
+logs_dir: "logs/align"
+benchmarks_dir: "benchmarks/align"
+threads_aln: 8
+mem_aln: 30G
+samtools_view_flag: 2308

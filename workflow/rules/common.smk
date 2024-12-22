@@ -1,4 +1,5 @@
 import os
+import hashlib
 from collections import defaultdict
 from typing import Iterator, DefaultDict
 
@@ -7,9 +8,7 @@ def read_fofn_file(path: str) -> Iterator[tuple[str, str]]:
     with open(path, "rt") as fh:
         for line in fh.readlines():
             abs_path = line.strip()
-            base_path, fname = os.path.split(abs_path)
-            fname = os.path.splitext(fname)[0]
-            yield abs_path, fname
+            yield abs_path, hashlib.sha256(abs_path.encode()).hexdigest()
 
 
 def get_dir_files(
@@ -21,8 +20,8 @@ def get_dir_files(
             read_dir_path = os.path.join(root, file)
             if not re.search(path_pattern, file):
                 continue
-            read_id = os.path.splitext(file)[0]
-            yield read_dir_path, read_id
+
+            yield read_dir_path, hashlib.sha256(read_dir_path.encode()).hexdigest()
 
         if i == depth:
             break

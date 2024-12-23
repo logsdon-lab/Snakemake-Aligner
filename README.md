@@ -80,11 +80,11 @@ mem_aln: 30G
 
 Aligner default parameters:
 * `winnowmap`
-    * `-a --eqx --cs -x map-pb -I8g`
+    * `-y -a --eqx --cs -x map-pb -I8g`
 * `pbmm2`
     * `--log-level DEBUG --preset SUBREAD --min-length 5000`
 * `minimap2`
-    * `-a --eqx --cs -x map-hifi -I8g`
+    * `-y -a --eqx --cs -x map-hifi -I8g`
 
 ### Usage
 ```bash

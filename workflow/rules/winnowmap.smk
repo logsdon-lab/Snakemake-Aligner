@@ -35,7 +35,7 @@ rule align_reads_to_asm:
         mem=config["mem_aln"],
         sort_mem=4,
     params:
-        aligner_opts=config.get("aligner_opts", "-a --eqx --cs -x map-pb"),
+        aligner_opts=config.get("aligner_opts", "-y -a --eqx --cs -x map-pb"),
         reads=lambda wc, input: (
             f"<(samtools bam2fq -T '*' {input.reads})"
             if str(input.reads).endswith(".bam")

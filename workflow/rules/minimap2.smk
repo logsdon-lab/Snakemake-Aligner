@@ -4,7 +4,7 @@ ALIGNER_OPTS = config.get(
     # See https://github.com/PacificBiosciences/pbmm2?tab=readme-ov-file#what-are-parameter-sets-and-how-can-i-override-them
     # And https://lh3.github.io/minimap2/minimap2.html
     (
-        "-a --eqx --cs -x map-hifi -I8g"
+        "-y -a --eqx --cs -x map-hifi -I8g"
         if ALIGNER == "minimap2"
         else "--log-level DEBUG --preset SUBREAD --min-length 5000"
     ),

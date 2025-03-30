@@ -12,6 +12,12 @@ samples:
     asm_fa: test/sample3/test.fa
     read_dir: test/sample3/reads
     read_rgx: ".*\\.bam$"
+  - name: sample4
+    asm_fa: test/sample3/test.fa
+    reads: [
+      "test/sample4/reads/1.bam",
+      "test/sample4/reads/2.bam",
+    ]
 
 output_dir: "results/align"
 logs_dir: "logs/align"

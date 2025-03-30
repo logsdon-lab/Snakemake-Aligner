@@ -57,6 +57,15 @@ samples:
     read_rgx: ".*\\.bam$"
 ```
 
+By path.
+```yaml
+samples:
+-   name: "1"
+    reads: [
+        "1/r1.bam"
+    ]
+```
+
 #### Configuration
 
 ##### General

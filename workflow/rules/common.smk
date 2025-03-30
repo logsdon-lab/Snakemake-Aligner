@@ -49,13 +49,18 @@ def get_sample_assemblies_and_reads() -> (
         else:
             raise ValueError("Must provide either asm_fofn or asm_dir and asm_rgx.")
 
-        if read_fofn:
+        if sm.get("reads"):
+            for path in sm["reads"]:
+                SAMPLE_READS[sm_name][hashlib.sha256(path.encode()).hexdigest()] = path
+        elif read_fofn:
             for file, fid in read_fofn_file(read_fofn):
                 SAMPLE_READS[sm_name][fid] = file
         elif sm.get("read_dir") and sm.get("read_rgx"):
             for file, fid in get_dir_files(sm["read_dir"], sm["read_rgx"]):
                 SAMPLE_READS[sm_name][fid] = file
         else:
-            raise ValueError("Must provide either read_fofn or read_dir and read_rgx.")
+            raise ValueError(
+                "Must provide either reads, read_fofn, or read_dir with read_rgx."
+            )
 
     return SAMPLE_ASSEMBLIES, SAMPLE_READS

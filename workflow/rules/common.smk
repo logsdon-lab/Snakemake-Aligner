@@ -45,7 +45,8 @@ def get_sample_assemblies_and_reads() -> (
             for file, fid in get_dir_files(sm["asm_dir"], sm["asm_rgx"]):
                 SAMPLE_ASSEMBLIES[sm_name][fid] = file
         elif sm.get("asm_fa"):
-            SAMPLE_ASSEMBLIES[sm_name] = sm["asm_fa"]
+            fid = hashlib.sha256(sm["asm_fa"]).hexdigest()
+            SAMPLE_ASSEMBLIES[sm_name][fid] = sm["asm_fa"]
         else:
             raise ValueError("Must provide either asm_fofn or asm_dir and asm_rgx.")
 

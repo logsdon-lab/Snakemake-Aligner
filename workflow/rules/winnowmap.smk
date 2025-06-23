@@ -37,7 +37,7 @@ rule align_reads_to_asm:
     params:
         aligner_opts=config.get("aligner_opts", "-y -a --eqx --cs -x map-pb"),
         reads=lambda wc, input: (
-            f"<(samtools bam2fq -T '*' {input.reads})"
+            f"<(samtools bam2fq -T {KEEP_TAGS} {input.reads})"
             if str(input.reads).endswith(".bam")
             else input.reads
         ),

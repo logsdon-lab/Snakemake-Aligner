@@ -9,6 +9,7 @@ LOGS_DIR = config.get("logs_dir", "logs/align")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/align")
 ALIGNERS = {"winnowmap", "pbmm2", "minimap2"}
 ALIGNER = config.get("aligner", "winnowmap")
+KEEP_TAGS = " ".join(config.get("keep_tags", ["'*'"]))
 
 
 def get_asm(wc):
@@ -35,7 +36,7 @@ rule merge_asm_files:
         asm_files=lambda wc: ancient(SAMPLE_ASSEMBLIES[str(wc.sm)].values()),
     output:
         merged_asm=temp(os.path.join(config["output_dir"], "{sm}_merged_asm.fa")),
-        asm=os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa"),
+        asm=temp(os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa")),
     conda:
         f"env/{ALIGNER}.yaml"
     resources:

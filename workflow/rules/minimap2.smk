@@ -26,7 +26,7 @@ rule align_reads_to_asm:
         aligner="minimap2" if ALIGNER == "minimap2" else "pbmm2 align",
         aligner_opts=ALIGNER_OPTS,
         reads=lambda wc, input: (
-            f"<(samtools bam2fq -T '*' {input.reads})"
+            f"<(samtools bam2fq -T {KEEP_TAGS} {input.reads})"
             if str(input.reads).endswith(".bam") and ALIGNER == "minimap2"
             else input.reads
         ),

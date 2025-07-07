@@ -18,6 +18,13 @@ samples:
       "test/sample4/reads/1.bam",
       "test/sample4/reads/2.bam",
     ]
+  - name: sample5
+    asm_fa: test/sample3/test.fa
+    reads: [
+      "test/sample4/reads/1.bam",
+      "test/sample4/reads/2.bam",
+    ]
+    min_read_length: 30000
 
 output_dir: "results/align"
 logs_dir: "logs/align"

@@ -4,13 +4,6 @@ include: "rules/common.smk"
 SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
-TMP_DIR = config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp"))
-LOGS_DIR = config.get("logs_dir", "logs/align")
-BMKS_DIR = config.get("benchmarks_dir", "benchmarks/align")
-ALIGNERS = {"winnowmap", "pbmm2", "minimap2"}
-ALIGNER = config.get("aligner", "winnowmap")
-KEEP_TAGS = ",".join(config.get("keep_tags", ["'*'"]))
-
 
 def get_asm(wc):
     return (

@@ -15,9 +15,9 @@ ENV_YAML = f"../env/{ALIGNER}.yaml"
 rule align_reads_to_asm:
     input:
         asm=get_asm,
-        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)],
+        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].path,
     output:
-        temp(os.path.join(config["output_dir"], "{sm}_{id}_hifi.bam")),
+        temp(os.path.join(config["output_dir"], "{sm}_{id}.bam")),
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
@@ -25,11 +25,7 @@ rule align_reads_to_asm:
     params:
         aligner="minimap2" if ALIGNER == "minimap2" else "pbmm2 align",
         aligner_opts=ALIGNER_OPTS,
-        reads=lambda wc, input: (
-            f"<(samtools bam2fq -T {KEEP_TAGS} {input.reads})"
-            if str(input.reads).endswith(".bam") and ALIGNER == "minimap2"
-            else input.reads
-        ),
+        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].as_cmd_arg(),
         aligner_threads="-t" if ALIGNER == "minimap2" else "-j",
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"

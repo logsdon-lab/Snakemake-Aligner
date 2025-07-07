@@ -95,6 +95,26 @@ Aligner default parameters:
 * `minimap2`
     * `-y -a --eqx --cs -x map-hifi -I8g`
 
+To keep tags of BAM files:
+```yaml
+samples:
+-   name: "1"
+    keep_tags: ["ML", "MM"]
+
+# Or globally across all samples:
+keep_tags: ["ML", "MM"]
+```
+
+To keep reads greater than some length:
+```yaml
+samples:
+-   name: "1"
+    min_read_length: 30000
+
+# Or globally across all samples:
+min_read_length: 30000
+```
+
 ### Usage
 ```bash
 snakemake -np -c 1 --configfile config/config.yaml

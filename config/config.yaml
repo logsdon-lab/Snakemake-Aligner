@@ -11,16 +11,17 @@ samples:
   - name: "NA12878_hifiasm_original"
     asm_fa: /project/logsdon_shared/projects/Mariah/HiPoreC/data/NA12878_hifiasm_ont_v0.19.5.fa
     read_fofn: config/NA12878_original.fofn
+    min_read_length: 30000
 
   - name: "NA12878_verkko_original"
     asm_fa: /project/logsdon_shared/projects/Mariah/HiPoreC/data/NA12878_verkko_v1.3.1.fa
     read_fofn: config/NA12878_original.fofn
+    keep_tags: ["'*'"]
 
 # winnowmap, pbmm2, or minimap2
 # aligner_opts is optional. See README.md for defaults.
 aligner: "winnowmap"
 aligner_opts: "-ax map-ont --eqx -s 4000"
-keep_tags: ["'*'"]
 output_dir: "results/align"
 logs_dir: "logs/align"
 benchmarks_dir: "benchmarks/align"

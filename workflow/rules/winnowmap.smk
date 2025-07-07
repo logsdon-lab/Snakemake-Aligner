@@ -26,7 +26,7 @@ rule get_repetitive_kmers:
 rule align_reads_to_asm:
     input:
         asm=get_asm,
-        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)],
+        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].path,
         repetitive_kmers=rules.get_repetitive_kmers.output.filtered_kmer_cnts,
     output:
         temp(os.path.join(config["output_dir"], "{sm}_{id}_hifi.bam")),
@@ -36,11 +36,7 @@ rule align_reads_to_asm:
         sort_mem=4,
     params:
         aligner_opts=config.get("aligner_opts", "-y -a --eqx --cs -x map-pb"),
-        reads=lambda wc, input: (
-            f"<(samtools bam2fq -T {KEEP_TAGS} {input.reads})"
-            if str(input.reads).endswith(".bam")
-            else input.reads
-        ),
+        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].as_cmd_arg(),
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"
             if config.get("samtools_view_flag")

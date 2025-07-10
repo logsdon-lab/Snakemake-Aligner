@@ -22,6 +22,7 @@ include: "rules/winnowmap.smk" if ALIGNER == "winnowmap" else "rules/minimap2.sm
 
 wildcard_constraints:
     sm="|".join(SAMPLE_ASSEMBLIES.keys()),
+    id="|".join(i for sm_reads in SAMPLE_READS.values() for i in sm_reads.keys()),
 
 
 rule merge_asm_files:

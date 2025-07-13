@@ -29,8 +29,8 @@ rule merge_asm_files:
     input:
         asm_files=lambda wc: ancient(SAMPLE_ASSEMBLIES[str(wc.sm)].values()),
     output:
-        merged_asm=temp(os.path.join(config["output_dir"], "{sm}_merged_asm.fa")),
         asm=temp(os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa")),
+        idx=temp(os.path.join(config["output_dir"], "{sm}_merged_dedup_asm.fa.fai")),
     conda:
         f"env/{ALIGNER}.yaml"
     resources:
@@ -39,14 +39,9 @@ rule merge_asm_files:
         os.path.join(LOGS_DIR, "merge_{sm}_asm_files.log"),
     shell:
         """
-        for file in {input.asm_files}; do
-            if [[ $file == *.gz ]]; then
-                zcat $file >> {output.merged_asm}
-            else
-                cat $file >> {output.merged_asm}
-            fi
-        done
-        seqkit rmdup {output.merged_asm} > {output.asm} 2> {log}
+        {{ find {input.asm_files} -type f -size +0 -exec zcat -f {{}} + | \
+        seqkit rmdup ;}} > {output.asm} 2> {log}
+        samtools faidx {output.asm}
         """
 
 

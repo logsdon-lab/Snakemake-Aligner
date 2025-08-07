@@ -3,5 +3,5 @@ channels:
   - bioconda
 dependencies:
   - samtools
-  - pbmm2==1.14.99
+  - pbmm2==1.17.0
   - seqkit

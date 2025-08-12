@@ -115,6 +115,16 @@ samples:
 min_read_length: 30000
 ```
 
+To output CRAM files:
+```yaml
+output_format: cram
+```
+
+If output BAM files and need csi index.
+```yaml
+use_bam_csi: true
+```
+
 ### Usage
 ```bash
 snakemake -np -c 1 --configfile config/config.yaml

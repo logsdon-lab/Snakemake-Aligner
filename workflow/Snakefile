@@ -4,6 +4,13 @@ include: "rules/common.smk"
 SAMPLE_ASSEMBLIES, SAMPLE_READS = get_sample_assemblies_and_reads()
 SAMPLE_INFO = {sm["name"]: sm for sm in config["samples"]}
 
+if config.get("output_format") == "cram":
+    OUTPUT_EXT = "cram"
+    OUTPUT_IDX_EXT = "crai"
+else:
+    OUTPUT_EXT = "bam"
+    OUTPUT_IDX_EXT = "csi" if config.get("use_bam_csi", False) else "bai"
+
 
 def get_asm(wc):
     return (
@@ -61,8 +68,10 @@ rule merge_read_asm_alignments:
     input:
         get_aln_to_asm,
     output:
-        alignment=os.path.join(config["output_dir"], "{sm}.bam"),
-        alignment_idx=os.path.join(config["output_dir"], "{sm}.bam.bai"),
+        alignment=os.path.join(config["output_dir"], f"{{sm}}.{OUTPUT_EXT}"),
+        alignment_idx=os.path.join(
+            config["output_dir"], f"{{sm}}.{OUTPUT_EXT}.{OUTPUT_IDX_EXT}"
+        ),
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
@@ -75,11 +84,14 @@ rule merge_read_asm_alignments:
         os.path.join(LOGS_DIR, "merge_{sm}_read_asm_alignments.log"),
     benchmark:
         os.path.join(BMKS_DIR, "merge_{sm}_read_asm_alignments.tsv")
+    params:
+        output_format=f"-O {OUTPUT_EXT}",
+        use_bam_csi="-c" if OUTPUT_IDX_EXT == "csi" else "",
     shell:
         """
         {{ samtools merge -@ {threads} - {input} | \
-        samtools sort -m {resources.sort_mem} -@ {threads} -;}} > {output.alignment} 2> {log}
-        samtools index {output.alignment} 2>> {log}
+        samtools sort -m {resources.sort_mem} -@ {threads} {params.output_format} -;}} > {output.alignment} 2> {log}
+        samtools index {params.use_bam_csi} {output.alignment} 2>> {log}
         """
 
 

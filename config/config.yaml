@@ -23,6 +23,8 @@ samples:
 aligner: "winnowmap"
 aligner_opts: "-ax map-ont --eqx -s 4000"
 output_dir: "results/align"
+output_format: cram
+# use_bam_csi: true
 logs_dir: "logs/align"
 benchmarks_dir: "benchmarks/align"
 threads_aln: 8

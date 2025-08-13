@@ -25,7 +25,12 @@ rule align_reads_to_asm:
     params:
         aligner="minimap2" if ALIGNER == "minimap2" else "pbmm2 align",
         aligner_opts=ALIGNER_OPTS,
-        reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].as_cmd_arg(),
+        # TODO: Min length filter doesn't work with pbmm2 since doesn't allow process substitution
+        reads=lambda wc: (
+            SAMPLE_READS[str(wc.sm)][str(wc.id)].path
+            if ALIGNER == "pbmm2"
+            else SAMPLE_READS[str(wc.sm)][str(wc.id)].as_cmd_arg()
+        ),
         aligner_threads="-t" if ALIGNER == "minimap2" else "-j",
         samtools_view=(
             f"samtools view -F {config['samtools_view_flag']} -u - |"

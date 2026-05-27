@@ -46,7 +46,7 @@ rule merge_asm_files:
         os.path.join(LOGS_DIR, "merge_{sm}_asm_files.log"),
     shell:
         """
-        {{ find {input.asm_files} -type f -size +0 -exec zcat -f {{}} + | \
+        {{ find -L {input.asm_files} -type f -size +0 -exec zcat -f {{}} + | \
         seqkit rmdup ;}} > {output.asm} 2> {log}
         samtools faidx {output.asm}
         """

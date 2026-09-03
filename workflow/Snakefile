@@ -41,7 +41,7 @@ rule merge_asm_files:
     conda:
         f"env/{ALIGNER}.yaml"
     resources:
-        mem=8,
+        mem="8G",
     log:
         os.path.join(LOGS_DIR, "merge_{sm}_asm_files.log"),
     shell:

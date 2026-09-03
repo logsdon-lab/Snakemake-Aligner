@@ -21,7 +21,7 @@ rule align_reads_to_asm:
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
-        sort_mem=4,
+        sort_mem="4G",
     params:
         aligner="minimap2" if ALIGNER == "minimap2" else "pbmm2 align",
         aligner_opts=ALIGNER_OPTS,
@@ -50,5 +50,5 @@ rule align_reads_to_asm:
         {{ {params.aligner} \
         {params.aligner_opts} \
         {params.aligner_threads} {threads} {input.asm} {params.reads} | {params.samtools_view} \
-        samtools sort -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
+        samtools sort -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
         """

@@ -10,6 +10,8 @@ rule get_repetitive_kmers:
     params:
         kmers=15,
         distinct_perc=0.9998,
+    resources:
+        mem=config["mem_aln"],
     conda:
         ENV_YAML
     log:
@@ -33,7 +35,7 @@ rule align_reads_to_asm:
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
-        sort_mem=4,
+        sort_mem="4G",
     params:
         aligner_opts=config.get("aligner_opts", "-y -a --eqx --cs -x map-pb"),
         reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].as_cmd_arg(),
@@ -56,5 +58,5 @@ rule align_reads_to_asm:
         {params.aligner_opts} \
         -t {threads} -I8g \
         {input.asm} {params.reads} | {params.samtools_view} \
-        samtools sort -m {resources.sort_mem}G -@ {threads} - ;}} > {output} 2>> {log}
+        samtools sort -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
         """

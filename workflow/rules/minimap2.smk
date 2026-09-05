@@ -18,6 +18,14 @@ rule align_reads_to_asm:
         reads=lambda wc: SAMPLE_READS[str(wc.sm)][str(wc.id)].path,
     output:
         temp(os.path.join(config["output_dir"], "{sm}_{id}.bam")),
+    log:
+        os.path.join(LOGS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
+    shadow:
+        "minimal"
+    conda:
+        ENV_YAML
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
@@ -37,18 +45,10 @@ rule align_reads_to_asm:
             if config.get("samtools_view_flag")
             else ""
         ),
-    shadow:
-        "minimal"
-    conda:
-        ENV_YAML
-    log:
-        os.path.join(LOGS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.log"),
-    benchmark:
-        os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
     shell:
         """
         {{ {params.aligner} \
-        {params.aligner_opts} \
-        {params.aligner_threads} {threads} {input.asm} {params.reads} | {params.samtools_view} \
-        samtools sort -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
+                {params.aligner_opts} \
+                {params.aligner_threads} {threads} {input.asm} {params.reads} | {params.samtools_view} \
+                samtools sort -m {resources.sort_mem} -@ {threads} - ;}} >{output} 2>>{log}
         """

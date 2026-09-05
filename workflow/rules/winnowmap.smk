@@ -7,21 +7,21 @@ rule get_repetitive_kmers:
     output:
         kmer_cnts=directory(os.path.join(config["output_dir"], "{sm}_kmers")),
         filtered_kmer_cnts=os.path.join(config["output_dir"], "{sm}_kmers.txt"),
-    params:
-        kmers=15,
-        distinct_perc=0.9998,
-    resources:
-        mem=config["mem_aln"],
-    conda:
-        ENV_YAML
     log:
         os.path.join(LOGS_DIR, "winnowmap_get_repetitive_kmers_{sm}.log"),
     benchmark:
         os.path.join(BMKS_DIR, "winnowmap_get_repetitive_kmers_{sm}.tsv")
+    conda:
+        ENV_YAML
+    resources:
+        mem=config["mem_aln"],
+    params:
+        kmers=15,
+        distinct_perc=0.9998,
     shell:
         """
-        meryl count k={params.kmers} output {output.kmer_cnts} {input.asm} 2> {log}
-        meryl print greater-than distinct={params.distinct_perc} {output.kmer_cnts} > {output.filtered_kmer_cnts} 2>> {log}
+        meryl count k={params.kmers} output {output.kmer_cnts} {input.asm} 2>{log}
+        meryl print greater-than distinct={params.distinct_perc} {output.kmer_cnts} >{output.filtered_kmer_cnts} 2>>{log}
         """
 
 
@@ -32,6 +32,14 @@ rule align_reads_to_asm:
         repetitive_kmers=rules.get_repetitive_kmers.output.filtered_kmer_cnts,
     output:
         temp(os.path.join(config["output_dir"], "{sm}_{id}_hifi.bam")),
+    log:
+        os.path.join(LOGS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.log"),
+    benchmark:
+        os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
+    shadow:
+        "minimal"
+    conda:
+        ENV_YAML
     threads: config["threads_aln"]
     resources:
         mem=config["mem_aln"],
@@ -44,19 +52,11 @@ rule align_reads_to_asm:
             if config.get("samtools_view_flag")
             else ""
         ),
-    shadow:
-        "minimal"
-    conda:
-        ENV_YAML
-    log:
-        os.path.join(LOGS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.log"),
-    benchmark:
-        os.path.join(BMKS_DIR, "align_{sm}_{id}_hifi_reads_to_asm.tsv")
     shell:
         """
         {{ winnowmap -W {input.repetitive_kmers} \
-        {params.aligner_opts} \
-        -t {threads} -I8g \
-        {input.asm} {params.reads} | {params.samtools_view} \
-        samtools sort -m {resources.sort_mem} -@ {threads} - ;}} > {output} 2>> {log}
+                {params.aligner_opts} \
+                -t {threads} -I8g \
+                {input.asm} {params.reads} | {params.samtools_view} \
+                samtools sort -m {resources.sort_mem} -@ {threads} - ;}} >{output} 2>>{log}
         """

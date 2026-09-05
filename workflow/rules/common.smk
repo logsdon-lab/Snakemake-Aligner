@@ -3,7 +3,6 @@ import hashlib
 from collections import defaultdict
 from typing import Iterator, NamedTuple
 
-
 TMP_DIR = config.get("tmp_dir", os.environ.get("TMPDIR", "/tmp"))
 LOGS_DIR = config.get("logs_dir", "logs/align")
 BMKS_DIR = config.get("benchmarks_dir", "benchmarks/align")
@@ -95,12 +94,12 @@ def get_sample_assemblies_and_reads() -> (
 
         if sm.get("reads"):
             for path in sm["reads"]:
-                SAMPLE_READS[sm_name][
-                    hashlib.sha256(path.encode()).hexdigest()
-                ] = Reads(
-                    path,
-                    sm.get("min_read_length", ALL_MIN_READ_LENGTH),
-                    sm.get("keep_tags", ALL_KEEP_TAGS),
+                SAMPLE_READS[sm_name][hashlib.sha256(path.encode()).hexdigest()] = (
+                    Reads(
+                        path,
+                        sm.get("min_read_length", ALL_MIN_READ_LENGTH),
+                        sm.get("keep_tags", ALL_KEEP_TAGS),
+                    )
                 )
         elif read_fofn:
             for file, fid in read_fofn_file(read_fofn):
